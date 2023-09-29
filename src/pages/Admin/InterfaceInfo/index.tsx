@@ -247,8 +247,30 @@ const TableList: React.FC = () => {
           ],
         },
       },
-
-
+    {
+      title: '接口单价',
+      dataIndex: 'price',
+      valueType: 'digit',
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+          },
+        ],
+      },
+    },
+    {
+      title: '接口头像',
+      dataIndex: 'avatarUrl',
+      valueType: 'text',
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+          },
+        ],
+      },
+    },
       {
         title: '请求方法',
         dataIndex: 'method',

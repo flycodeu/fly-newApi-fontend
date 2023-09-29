@@ -219,6 +219,7 @@ declare namespace API {
   };
 
   type InterfaceInfoNew = {
+    avatarUrl?: string;
     createTime?: string;
     description?: string;
     id?: number;
@@ -258,6 +259,7 @@ declare namespace API {
   };
 
   type InterfaceInfoUpdateRequest = {
+    avatarUrl?: string;
     description?: string;
     id?: number;
     invokeCount?: number;
@@ -292,6 +294,7 @@ declare namespace API {
   };
 
   type InterfaceInfoVo = {
+    avatarUrl?: string;
     createTime?: string;
     description?: string;
     id?: number;
@@ -403,6 +406,7 @@ declare namespace API {
   };
 
   type OrderApi = {
+    alipayTradeNo?: string;
     buyCount?: number;
     createTime?: string;
     delayTime?: string;

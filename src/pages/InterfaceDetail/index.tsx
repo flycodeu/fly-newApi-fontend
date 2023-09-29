@@ -1,7 +1,6 @@
 import { useParams } from '@@/exports';
 import { PageContainer } from '@ant-design/pro-components';
 import {
-  Badge,
   Button,
   Card,
   Col,
@@ -12,21 +11,21 @@ import {
   InputNumber,
   message,
   Modal,
-  Row,
-  Tag, Tooltip,
+  Row, Tag, Tooltip,
 } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { getInterfaceInfoByIdUsingGET, invokeInterfaceInfoUsingPOST } from '@/services/fly/interfaceController';
-import { getLoginUserTokenUsingGET } from '@/services/fly/userController';
-import VanillaJSONEditor from './VanillaJSONEditor';
 import {
   addUserInterfaceInToTableUsingGET,
-  invokeCountUsingGET,
   invokeCountUsingPOST,
 } from '@/services/fly/userInterfaceInfoController';
 import { createOrderUsingPOST } from '@/services/fly/orderController';
-import { payUsingGET } from '@/services/fly/aliPayController';
-import {history} from "@umijs/max";
+import { history } from '@umijs/max';
+// import CodeHighlighting from '@/components/CodeHighting';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import CodeHighlighting from '@/components/CodeHighting';
+import ReactJson from "react-json-view";
 /**
  * 主页
  * @constructor
@@ -39,6 +38,7 @@ const Index: React.FC = () => {
   const [interfaceId, setInterfaceId] = useState(Number);
   const [data, setData] = useState<API.InterfaceInfoNew>();
   const [invokeRes, setInvokeRes] = useState<any>();
+
   const [count, setCount] = useState(Number);
   const [btndis, setBtndis] = useState<boolean>(false);
   const [showBuyModel, setShowBuyModel] = useState<boolean>(false);
@@ -49,6 +49,14 @@ const Index: React.FC = () => {
     json: param,
     text: undefined,
   });
+
+  type ApiResponse = {
+    code: number;
+    data?: any; // 数据部分类型不确定，使用 any
+    message: string;
+  };
+
+  const [invokeResJson, setInvokeResJson] = useState<ApiResponse | null>(null);
 
   const userAccount = localStorage.getItem('userAccount') as string;
   const [buyCount, setBuyCount] = useState<number>(1);
@@ -86,16 +94,18 @@ const Index: React.FC = () => {
     setLoading(false);
 
     try {
-      const user = await getLoginUserTokenUsingGET({
-        token: localStorage.getItem('token') as string,
-      });
-      let userdata = user.data;
-      setUserId(userdata?.id || 0);
+      // const user = await getLoginUserTokenUsingGET({
+      //   token: localStorage.getItem('token') as string,
+      // });
+      // let userdata = user.data;
+      // setUserId(userdata?.id || 0);
+      setUserId(localStorage.getItem('userId') as number);
     } catch (e: any) {
       message.error('用户不存在');
     }
     setLoading(false);
-
+  };
+  const loadAllInvokeCount = async () => {
     try {
       const leftCount = await invokeCountUsingPOST({
         userId: userId,
@@ -107,32 +117,11 @@ const Index: React.FC = () => {
     }
   };
 
-
   useEffect(() => {
     loadData();
+    loadAllInvokeCount();
   }, []);
 
-  /*
-  * 将图片链接的文本转换为img格式
-  * */
-  const convertText = (text: string) => {
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const matches = text.match(urlRegex);
-    if (!matches) {
-      return <>{text}</>;
-    }
-    const parts = text.split(urlRegex);
-    return (
-      <>
-        {parts.map((part, i) => (
-          <div key={i} style={{ display: 'block' }}>
-            {part}
-            {matches[i] && <img alt={'图片'} src={matches[i]} style={{ height: 200, width: 150 }} />}
-          </div>
-        ))}
-      </>
-    );
-  };
   // const setDataInterface = async () => {
   //   try {
   //     await canAccessInvokeUsingPOST({
@@ -168,7 +157,6 @@ const Index: React.FC = () => {
     fetchData();
   }, [userId, interfaceId]);
 
-
   const onFinish = async (values: any) => {
     if (!params.id) {
       message.error('接口不存在');
@@ -182,6 +170,20 @@ const Index: React.FC = () => {
         ...values,
       });
       setInvokeRes(res.data);
+
+      const jsonString = res;
+      // let parsedData: ApiResponse | null = null;
+      // parsedData = JSON.parse(jsonString)
+      // try {
+      //   parsedData = JSON.parse(jsonString);
+      // } catch (error) {
+      //   console.error('无法解析JSON字符串：', error);
+      //   // 处理无法解析的情况
+      //
+      // }
+      //
+      // setInvokeResJson(res.data)
+      // console.log(invokeResJson);
       fetchData();
       message.success('测试成功');
     } catch (error: any) {
@@ -242,9 +244,9 @@ const Index: React.FC = () => {
   }, [buyCount, data?.price]);
 
 
-  const handlePayClick = async()=>{
-    history.push("/myOrderList")
-  }
+  const handlePayClick = async () => {
+    history.push('/myOrderList');
+  };
 
   return (
     <PageContainer title="查看接口文档">
@@ -294,7 +296,6 @@ const Index: React.FC = () => {
           <Descriptions.Item label={'msg'}>返回消息</Descriptions.Item>
         </Descriptions>
       </Card>
-
       <Divider />
       <Card>
 
@@ -336,11 +337,37 @@ const Index: React.FC = () => {
       </Card>
       {}
       <Card title={'返回结果'} loading={invokeLoading}>
-        <Input.TextArea value={invokeRes} rows={8} />
+
+        {/*<Input.TextArea value={invokeRes} rows={8} />*/}
+        <SyntaxHighlighter language="javascript"
+                           style={docco}
+                           lineProps={{ style: { paddingBottom: 8 } }}
+                           wrapLines={true}
+                           PreTag="div"
+                           showLineNumbers={true}  //这个是显示不显示左侧的行数
+                           lineNumberStyle={{ color: '#ddd', fontSize: 20 }}     //这个是行数的样式
+        >
+          {JSON.parse(JSON.stringify(invokeRes, null, 2))}
+        </SyntaxHighlighter>
       </Card>
+
+      <ReactJson
+        src={invokeRes}
+        name={false}
+        collapsed={1}
+        displayDataTypes={false}
+        displayObjectSize={false}
+        enableClipboard={false}
+        iconStyle="square"
+      />
+
+
+
+
       {/*value={typeof invokeRes === 'string' ? convertText(invokeRes) : invokeRes}*/}
 
       {/*<Card title={'剩余调用次数'}>{count}</Card>*/}
+
 
       <Modal
         visible={showBuyModel}

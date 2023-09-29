@@ -8,6 +8,8 @@ import { AvatarDropdown, AvatarName } from './components/RightContent/AvatarDrop
 import { errorConfig } from './requestErrorConfig';
 import { getLoginUserTokenUsingGET, getLoginUserUsingGET } from '@/services/fly/userController';
 
+import defaultSettings from '../config/defaultSettings';
+
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
 
@@ -110,7 +112,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
           <SettingDrawer
             disableUrlParams
             enableDarkTheme
-            // settings={initialState?.settings}
+            settings={defaultSettings }
             onSettingChange={(settings) => {
               setInitialState((preInitialState) => ({
                 ...preInitialState,
@@ -132,7 +134,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
  */
 export const request = {
   ...errorConfig,
-  //
+  // 39.104.23.173
   baseURL: 'http://localhost:7529',
   withCredentials: true,
 };

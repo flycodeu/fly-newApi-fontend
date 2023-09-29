@@ -212,10 +212,10 @@ const Login: React.FC = () => {
                         key: 'mobile',
                         label: '手机号登录',
                       },
-                      {
-                        key: 'email',
-                        label: '邮箱登录',
-                      },
+                      // {
+                      //   key: 'email',
+                      //   label: '邮箱登录',
+                      // },
                     ]}
                   />
 
